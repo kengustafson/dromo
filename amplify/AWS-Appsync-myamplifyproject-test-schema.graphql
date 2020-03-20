@@ -1,0 +1,192 @@
+﻿schema {
+  query: Query
+  mutation: Mutation
+  subscription: Subscription
+}
+
+type Customers {
+  VisitDate: String
+  VisitStart: String
+  distance: Float
+  email: String
+  id: Int
+  name: String
+  patientID: Int
+  patientIDa: Int
+  patientIDb: Int
+  phone: String
+}
+
+type ModelTodoConnection {
+  items: [Todo]
+  nextToken: String
+}
+
+type Mutation {
+  createCustomers(createCustomersInput: CreateCustomersInput!): Customers
+  createOrders(createOrdersInput: CreateOrdersInput!): Orders
+  createTodo(input: CreateTodoInput!): Todo
+  deleteCustomers(id: Int!): Customers
+  deleteOrders(id: Int!): Orders
+  deleteTodo(input: DeleteTodoInput!): Todo
+  updateCustomers(id: Int!): Customers
+  updateCustomersOrig(updateCustomersInput: UpdateCustomersInput!): Customers
+  updateOrders(updateOrdersInput: UpdateOrdersInput!): Orders
+  updateSchedule(id: Int!, patientID: Int!): Customers
+  updateTodo(input: UpdateTodoInput!): Todo
+}
+
+type Orders {
+  customerId: Int!
+  id: Int!
+  orderDate: AWSDateTime
+}
+
+type PendingVisits {
+  id: Int
+  name: String
+  patientID: Int
+  seeBy: String
+  visitCode: String
+  weekOf: String
+}
+
+type Query {
+  closestPatients(patientID: Int!): [Customers]
+  getOrders(id: Int!): Orders
+  getTodo(id: ID!): Todo
+  listCustomerss(VisitDate: String): [Customers]
+  listOrderss: [Orders]
+  listTodos(filter: ModelTodoFilterInput, limit: Int, nextToken: String): ModelTodoConnection
+  pendingVisits: [PendingVisits]
+}
+
+type Subscription {
+  onCreateCustomers: Customers @aws_subscribe(mutations : ["createCustomers"])
+  onCreateOrders: Orders @aws_subscribe(mutations : ["createOrders"])
+  onCreateTodo: Todo @aws_subscribe(mutations : ["createTodo"])
+  onDeleteTodo: Todo @aws_subscribe(mutations : ["deleteTodo"])
+  onUpdateTodo: Todo @aws_subscribe(mutations : ["updateTodo"])
+}
+
+type Todo {
+  description: String
+  id: ID!
+  name: String!
+}
+
+enum ModelSortDirection {
+  ASC
+  DESC
+}
+
+input CreateCustomersInput {
+  email: String!
+  id: Int!
+  name: String!
+  phone: String!
+}
+
+input CreateOrdersInput {
+  customerId: Int!
+  id: Int!
+  orderDate: AWSDateTime
+}
+
+input CreateTodoInput {
+  description: String
+  id: ID
+  name: String!
+}
+
+input DeleteTodoInput {
+  id: ID
+}
+
+input ModelBooleanFilterInput {
+  eq: Boolean
+  ne: Boolean
+}
+
+input ModelFloatFilterInput {
+  between: [Float]
+  contains: Float
+  eq: Float
+  ge: Float
+  gt: Float
+  le: Float
+  lt: Float
+  ne: Float
+  notContains: Float
+}
+
+input ModelIDFilterInput {
+  beginsWith: ID
+  between: [ID]
+  contains: ID
+  eq: ID
+  ge: ID
+  gt: ID
+  le: ID
+  lt: ID
+  ne: ID
+  notContains: ID
+}
+
+input ModelIntFilterInput {
+  between: [Int]
+  contains: Int
+  eq: Int
+  ge: Int
+  gt: Int
+  le: Int
+  lt: Int
+  ne: Int
+  notContains: Int
+}
+
+input ModelStringFilterInput {
+  beginsWith: String
+  between: [String]
+  contains: String
+  eq: String
+  ge: String
+  gt: String
+  le: String
+  lt: String
+  ne: String
+  notContains: String
+}
+
+input ModelTodoFilterInput {
+  and: [ModelTodoFilterInput]
+  description: ModelStringFilterInput
+  id: ModelIDFilterInput
+  name: ModelStringFilterInput
+  not: ModelTodoFilterInput
+  or: [ModelTodoFilterInput]
+}
+
+input UpdateCustomersInput {
+  email: String
+  id: Int!
+  name: String
+  phone: String
+}
+
+input UpdateOrdersInput {
+  customerId: Int
+  id: Int!
+  orderDate: AWSDateTime
+}
+
+input UpdateScheduleInput {
+  id: Int!
+  patientID: Int!
+}
+
+input UpdateTodoInput {
+  description: String
+  id: ID!
+  name: String
+}

@@ -1,0 +1,155 @@
+-------------------------------------------------------Resolver for Mutation.updateSchedule
+:::::::::::::request mapping template::::::::::::::
+## #set( $updateList = {} )
+## #foreach( $entry in $ctx.args.updateOrdersInput.keySet() )
+##   #set( $discard = $updateList.put($entry, "'$ctx.args.updateOrdersInput[$entry]'") )
+## #end
+## #set( $update = $updateList.toString().replace("{","").replace("}","") )
+## {
+##   "version": "2018-05-29",
+##   "statements":   ["UPDATE Orders SET $update WHERE id=$ctx.args.updateOrdersInput.id", "SELECT * FROM Orders WHERE id=$ctx.args.updateOrdersInput.id"]
+## }
+
+## #set( $updateList = {} ) **
+## #foreach( $entry in $ctx.args.updateCustomersInput.keySet() ) **
+##  #set( $discard = $updateList.put($entry, "'$ctx.args.updateCustomersInput[$entry]'") ) **
+## #end **
+## #set( $update = $updateList.toString().replace("{","").replace("}","") ) **
+{
+  "version": "2018-05-29",
+  ## "statements":   ["UPDATE Customers SET $update WHERE id=$ctx.args.updateCustomersInput.id", "SELECT * FROM Customers WHERE id=$ctx.args.updateCustomersInput.id"] ** 
+  "statements":   ["UPDATE Schedule, Patients SET Schedule.patientID=$ctx.args.patientID, Schedule.name=Patients.name, Schedule.address=Patients.address WHERE Schedule.id=$ctx.args.id AND Patients.id=$ctx.args.patientID", "SELECT name FROM Schedule WHERE id=$ctx.args.id"]
+}
+::::::::::::::response mapping template::::::::::::::::::::::
+## Raise a GraphQL field error in case of a datasource invocation error
+#if($ctx.error)
+    $utils.error($ctx.error.message, $ctx.error.type)
+#end
+##$utils.toJson($utils.rds.toJsonObject($ctx.result)[0])
+$utils.toJson($utils.parseJson($utils.rds.toJsonString($ctx.result))[0][0])
+
+--------------------------------------------------------------Resolver for Mutation.deleteCustomers
+:::::::::::::::::::request mapping template::::::::::::::::::::::
+{
+  "version": "2018-05-29", ##"SELECT * FROM Schedule WHERE id=$ctx.args.id", 
+  "statements":   ["DELETE FROM Schedule WHERE id=$ctx.args.id"]
+}
+:::::::::::::::::::response mapping template::::::::::::::::::::::::
+$utils.toJson($utils.rds.toJsonObject($ctx.result)[0][0])
+
+----------------------------------------------------------------Resolver for Mutation.createCustomers
+:::::::::::::::::::request mapping template::::::::::::::::::::::
+#set( $cols = [] )
+#set( $vals = [] )
+#foreach( $entry in $ctx.args.createCustomersInput.keySet() )
+  #set( $discard = $cols.add($entry) )
+  #set( $discard = $vals.add("'$ctx.args.createCustomersInput[$entry]'") )
+#end
+#set( $valStr = $vals.toString().replace("[","(").replace("]",")") )
+#set( $colStr = $cols.toString().replace("[","(").replace("]",")") )
+{
+  "version": "2018-05-29",
+  "statements":   ["INSERT INTO Customers $colStr VALUES $valStr", "SELECT * FROM Customers WHERE id=$ctx.args.createCustomersInput.id"]
+}
+:::::::::::::::::::response mapping template::::::::::::::::::::::::
+$utils.toJson($utils.parseJson($utils.rds.toJsonString($ctx.result))[1][0])
+
+------------------------------------------------------------------Resolver for Mutation.updateCustomers
+:::::::::::::::::::request mapping template::::::::::::::::::::::
+## #set( $updateList = {} ) **
+## #foreach( $entry in $ctx.args.updateCustomersInput.keySet() ) **
+##  #set( $discard = $updateList.put($entry, "'$ctx.args.updateCustomersInput[$entry]'") ) **
+## #end **
+## #set( $update = $updateList.toString().replace("{","").replace("}","") ) **
+
+{
+  "version": "2018-05-29",
+  ## "statements":   ["UPDATE Customers SET $update WHERE id=$ctx.args.updateCustomersInput.id", "SELECT * FROM Customers WHERE id=$ctx.args.updateCustomersInput.id"] ** 
+  "statements":   ["UPDATE Schedule SET name='', address='' WHERE id=$ctx.args.id", "SELECT VisitStart FROM Schedule WHERE id=$ctx.args.id"]
+}
+:::::::::::::::::::response mapping template::::::::::::::::::::::::
+$utils.toJson($utils.parseJson($utils.rds.toJsonString($ctx.result))[1][0])
+
+---------------------------------------------------------------Resolver for Mutation.deleteOrders
+:::::::::::::::::::request mapping template::::::::::::::::::::::
+{
+  "version": "2018-05-29",
+  "statements":   ["SELECT * FROM Orders WHERE id=$ctx.args.id", "DELETE FROM Orders WHERE id=$ctx.args.id"]
+}
+:::::::::::::::::::response mapping template::::::::::::::::::::::::
+$utils.toJson($utils.rds.toJsonObject($ctx.result)[0][0])
+
+--------------------------------------------------------------------------Resolver for Mutation.createOrders
+:::::::::::::::::::request mapping template::::::::::::::::::::::
+#set( $cols = [] )
+#set( $vals = [] )
+#foreach( $entry in $ctx.args.createOrdersInput.keySet() )
+  #set( $discard = $cols.add($entry) )
+  #set( $discard = $vals.add("'$ctx.args.createOrdersInput[$entry]'") )
+#end
+#set( $valStr = $vals.toString().replace("[","(").replace("]",")") )
+#set( $colStr = $cols.toString().replace("[","(").replace("]",")") )
+{
+  "version": "2018-05-29",
+  "statements":   ["INSERT INTO Orders $colStr VALUES $valStr", "SELECT * FROM Orders WHERE id=$ctx.args.createOrdersInput.id"]
+}
+:::::::::::::::::::response mapping template::::::::::::::::::::::::
+$utils.toJson($utils.parseJson($utils.rds.toJsonString($ctx.result))[1][0])
+
+-----------------------------------------------------------------------Resolver for Mutation.updateOrders
+:::::::::::::::::::request mapping template::::::::::::::::::::::
+#set( $updateList = {} )
+#foreach( $entry in $ctx.args.updateOrdersInput.keySet() )
+  #set( $discard = $updateList.put($entry, "'$ctx.args.updateOrdersInput[$entry]'") )
+#end
+#set( $update = $updateList.toString().replace("{","").replace("}","") )
+{
+  "version": "2018-05-29",
+  "statements":   ["UPDATE Orders SET $update WHERE id=$ctx.args.updateOrdersInput.id", "SELECT * FROM Orders WHERE id=$ctx.args.updateOrdersInput.id"]
+}
+:::::::::::::::::::response mapping template::::::::::::::::::::::::
+$utils.toJson($utils.parseJson($utils.rds.toJsonString($ctx.result))[1][0])
+
+-------------------------------------------------------------------Resolver for Query.pendingVisits
+:::::::::::::::::::request mapping template::::::::::::::::::::::
+#**
+  Select statement for a relational database data source
+*#
+{
+    "version": "2018-05-29",
+    "statements": [
+        "select PendingVisits.id, PendingVisits.patientID, PendingVisits.weekOf, PendingVisits.seeBy, PendingVisits.visitCode, Patients.name from PendingVisits JOIN Patients ON PendingVisits.patientID = Patients.id"
+    ]
+}
+:::::::::::::::::::response mapping template::::::::::::::::::::::::
+## Raise a GraphQL field error in case of a datasource invocation error
+#if($ctx.error)
+    $utils.error($ctx.error.message, $ctx.error.type)
+#end
+
+$utils.toJson($utils.rds.toJsonObject($ctx.result)[0])
+
+------------------------------------------------------------------------Resolver for Query.closestPatients
+:::::::::::::::::::request mapping template::::::::::::::::::::::
+{
+    "version": "2018-05-29", 
+    "statements":["SELECT Distances.patientIDa, Distances.patientIDb, Distances.distance, Patients.name, Patients.phone, Patients.id FROM Distances JOIN Patients ON Distances.patientIDb = Patients.id WHERE patientIDa='$ctx.args.patientID' UNION ALL SELECT Distances.patientIDb, Distances.patientIDa, Distances.distance, Patients.name, Patients.phone, Patients.id FROM Distances JOIN Patients ON Distances.patientIDa = Patients.id WHERE patientIDb='$ctx.args.patientID' ORDER BY distance LIMIT 3"]
+}
+:::::::::::::::::::response mapping template::::::::::::::::::::::::
+## Raise a GraphQL field error in case of a datasource invocation error
+#if($ctx.error)
+   $utils.error($ctx.error.message, $ctx.error.type)
+#end
+
+$utils.toJson($utils.rds.toJsonObject($ctx.result)[0])
+
+------------------------------------------------------------------------------Resolver for Query.listCustomerss
+:::::::::::::::::::request mapping template::::::::::::::::::::::
+{
+    "version": "2018-05-29",
+    "statements": [
+        "select id, patientID, name, DATE_FORMAT(VisitStart, '%Y-%m-%dT%T') AS VisitStart from Schedule where VisitDate = '$ctx.args.VisitDate'"
+    ]
+}
+:::::::::::::::::::response mapping template::::::::::::::::::::::::
+$utils.toJson($utils.rds.toJsonObject($ctx.result)[0])

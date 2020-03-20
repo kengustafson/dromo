@@ -1,0 +1,8 @@
+AWS  Appsync  Settings
+API URL
+https://gqxorstql5ezrfdn6vkhffgwva.appsync-api.us-east-2.amazonaws.com/graphql
+API ID
+em7kbtcuavgtfbon4rjsh2zwg4
+Primary auth mode
+API KEY
+da2-usrqsb4wy5h7bjcfq5eeemwawa
